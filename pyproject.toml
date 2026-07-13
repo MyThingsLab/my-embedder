@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "my-embedder"
+version = "0.0.1"
+description = "Open-source-library embedding backends for the mythings.embed protocol, with a local OpenAI-compatible server."
+authors = [{ name = "Lorenzo Liuzzo", email = "lorenzoliuzzo@outlook.com" }]
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+# The base install is deliberately light: the model libraries are heavy
+# (ONNX / PyTorch) and only one backend is used at a time, so each is an opt-in
+# extra. The base package still runs `serve`/`embed` once a backend extra (or an
+# injected encoder) is present.
+dependencies = ["my-things-core"]
+
+[project.optional-dependencies]
+fastembed = ["fastembed>=0.3"]
+sentence-transformers = ["sentence-transformers>=3"]
+dev = ["pytest>=8", "pytest-cov>=5", "ruff>=0.6", "pre-commit>=3"]
+
+[project.scripts]
+myembedder = "myembedder.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/myembedder"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.coverage.report]
+# Meaningful only now that the package ships a real skeleton; CI runs pytest
+# with --cov, so a coverage regression fails the build.
+fail_under = 85
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["slow: integration/slow tests, excluded from the fast local loop"]
